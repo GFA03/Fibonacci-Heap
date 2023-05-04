@@ -193,14 +193,27 @@ int FibonacciHeap::extractMin() {
 }
 // inainte sa faci cut child verifici daca parintele e marked sau nu
 void FibonacciHeap::cutChild(Node* parent, Node* child) {
-    // rupe nodul de parinte
-    // parinte->degree--
-    // schimba legaturile cu fratii sa sara peste
-    // check if new value is the new minimum value
-    // leaga nodul de minNode
-    // trebuie sa testezi si daca parintele parintelui pointeaza cu child catre el ( dupa ar trb sa pointeze cu child catre altcineva )
-    // scoti copilul, apoi parintele ( le bagi in rootlist) si setezi marked la false
-    if(parent)
+    if(parent->child == child) {
+        if(parent->degree == 1) {
+            parent->child = nullptr;
+        }else{
+            parent->child = child->left;
+        }
+    }
+    child->right->left = child->left;
+    child->left->right = child->right;
+    Node::linkNodes(this->minNode, child);
+    parent->degree--;
+    child->marked = false;
+    if(child->value < this->minNode->value)
+        this->minNode = child;
+    if(parent->marked == true) {
+        if(parent->parent != nullptr)
+            cutChild(parent->parent, parent);
+    }else {
+        if (parent->parent != nullptr)
+            parent->marked = true;
+    }
 }
 
 void FibonacciHeap::decreaseKey(Node* node, int newValue) {
@@ -214,22 +227,7 @@ void FibonacciHeap::decreaseKey(Node* node, int newValue) {
             this->minNode = node;
         return;
     }
-    if(node->parent->marked) {
-        node->parent->marked = false;
-        if(node->parent->parent == nullptr) // ASTA O FACI UNDEVA LA FINAL
-            return;
-        node->parent->parent->marked = true;
-        // trebuie sa testezi si daca parintele parintelui pointeaza cu child catre el ( dupa ar trb sa pointeze cu child catre altcineva )
-        // scoti copilul, apoi parintele ( le bagi in rootlist) si setezi marked la false
-    }else {
-        node->parent->marked = true;
-    }
-    // setezi valoare lui node -> newValue
-    // rupe nodul de parinte
-    // parinte->degree--
-    // schimba legaturile cu fratii sa sara peste
-    // check if new value is the new minimum value
-    // leaga nodul de minNode
+    cutChild(node->parent, node);
 }
 
 int main() {
