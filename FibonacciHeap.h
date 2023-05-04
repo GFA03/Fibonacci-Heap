@@ -35,7 +35,7 @@ public:
     int findMin();
 //    void merge(Node* root1, Node* root2);
     void insert(int value);
-    static void mergeTrees(Node* root1, Node* root2, std::vector<Node*> degrees);
+    static Node* mergeTrees(Node* root1, Node* root2, std::vector<Node*>& degrees);
     int extractMin();
     void decreaseKey();
 };

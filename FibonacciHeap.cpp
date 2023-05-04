@@ -1,7 +1,6 @@
 //
 // Created by gfa on 5/3/23.
 //
-// CAREFUL HERE!!!
 #include <FibonacciHeap.h>
 #include <cmath>
 
@@ -95,24 +94,25 @@ void FibonacciHeap::insert(int value) {
         this->minNode = newNode;
     this->numberOfNodes++;
 }
-//
-//void FibonacciHeap::mergeTrees(Node *root1, Node *root2, std::vector<Node *> degrees) {
-//    Node* minNodeTemp;
-//    Node* maxNodeTemp;
-//    if(root1->value < root2->value)
-//    {
-//        minNodeTemp = root1;
-//        maxNodeTemp = root2;
-//    }
-//    else{
-//        minNodeTemp = root2;
-//        maxNodeTemp = root1;
-//    }
-//    degrees[root1->degree] = nullptr;
-//    maxNodeTemp->left->right = maxNodeTemp->right;
-//    maxNodeTemp->right->left = maxNodeTemp->left;
-//    Node::merge(minNodeTemp, maxNodeTemp);
-//}
+
+Node* FibonacciHeap::mergeTrees(Node *root1, Node *root2, std::vector<Node *>& degrees) {
+    Node* minNodeTemp;
+    Node* maxNodeTemp;
+    if(root1->value < root2->value)
+    {
+        minNodeTemp = root1;
+        maxNodeTemp = root2;
+    }
+    else{
+        minNodeTemp = root2;
+        maxNodeTemp = root1;
+    }
+    degrees[minNodeTemp->degree] = nullptr;
+    maxNodeTemp->left->right = maxNodeTemp->right;
+    maxNodeTemp->right->left = maxNodeTemp->left;
+    Node::merge(minNodeTemp, maxNodeTemp);
+    return minNodeTemp;
+}
 
 int FibonacciHeap::extractMin() {
     int minValue = this->minNode->value;
@@ -159,35 +159,28 @@ int FibonacciHeap::extractMin() {
     degrees[currentNode->degree] = currentNode;
     passedBy[currentNode] = true;
     currentNode = currentNode->right;
+
     Node* minNodeTemp;
-    Node* maxNodeTemp;
-    //MERGE EVERYTHING
-    // atunci cand faci un merge, pui starting pointul de la noul tree
-    while(passedBy[currentNode] == false){
+    Node* currentNodeTemp; // if currentNode goes as a child then it will stop the while (that's why is needed a temporary current node)
+
+    while(!passedBy[currentNode]) {
         passedBy[currentNode] = true;
-        if(degrees[currentNode->degree] != nullptr){
-            if(degrees[currentNode->degree]->value < currentNode->value)
-            {
-                minNodeTemp = degrees[currentNode->degree];
-                maxNodeTemp = currentNode;
+        currentNodeTemp = currentNode->right;
+        if(degrees[currentNode->degree] != nullptr) {
+            minNodeTemp = FibonacciHeap::mergeTrees(currentNode, degrees[currentNode->degree], degrees);
+            while(degrees[minNodeTemp->degree] != nullptr) {
+                minNodeTemp = FibonacciHeap::mergeTrees(minNodeTemp, degrees[minNodeTemp->degree], degrees);
             }
-            else{
-                minNodeTemp = currentNode;
-                maxNodeTemp = degrees[currentNode->degree];
-            }
-            degrees[currentNode->degree] = nullptr;
-            maxNodeTemp->left->right = maxNodeTemp->right;
-            maxNodeTemp->right->left = maxNodeTemp->left;
-            Node::merge(minNodeTemp, maxNodeTemp);
             degrees[minNodeTemp->degree] = minNodeTemp;
-        }else{
+        }else {
             degrees[currentNode->degree] = currentNode;
         }
-        currentNode = currentNode->right;
+        currentNode = currentNodeTemp;
     }
     this->numberOfNodes--;
     return minValue;
 }
+
 
 int main() {
     FibonacciHeap a;
@@ -197,5 +190,12 @@ int main() {
     a.insert(4);
     a.insert(6);
     a.extractMin();
-//    std::cout << a;
+    a.insert(1);
+    a.insert(2);
+    a.insert(10);
+    a.insert(1);
+    a.insert(16);
+    a.insert(20);
+    a.extractMin();
+    std::cout << a;
 }
