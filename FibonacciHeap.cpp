@@ -27,7 +27,7 @@ void Node::appendChild(Node *newChild) {
 }
 
 void Node::merge(Node* node1, Node* node2) {
-    if(node1->value < node2->value) {
+    if(node1->value <= node2->value) {
         node1->appendChild(node2);
         node1->degree++;
     }
@@ -60,7 +60,12 @@ void display(Node* node, std::ostream& out){
 
 std::ostream& operator<<(std::ostream& out, const FibonacciHeap& obj) {
     out << "Number of nodes: " << obj.numberOfNodes << '\n';
-    out << "Minimum value: " << obj.minNode->value << '\n';
+    if(obj.minNode)
+        out << "Minimum value: " << obj.minNode->value << '\n';
+    else{
+        out << "Nodes not found!\n";
+        return out;
+    }
     out << "Trees:\n";
     Node* currentNode = obj.minNode;
     Node* startingPoint = currentNode;
@@ -98,7 +103,7 @@ void FibonacciHeap::insert(int value) {
 Node* FibonacciHeap::mergeTrees(Node *root1, Node *root2, std::vector<Node *>& degrees) {
     Node* minNodeTemp;
     Node* maxNodeTemp;
-    if(root1->value < root2->value)
+    if(root1->value <= root2->value)
     {
         minNodeTemp = root1;
         maxNodeTemp = root2;
@@ -130,14 +135,17 @@ int FibonacciHeap::extractMin() {
 
     if(this->minNode->child) {
         Node* minNodeChild = this->minNode->child;
+        Node* tempNode;
         minNodeChild->parent = nullptr;
         startingPoint = minNodeChild;
+        tempNode = minNodeChild->right;
         Node::linkNodes(newMinNode, minNodeChild);
-        minNodeChild = minNodeChild->right;
+        minNodeChild = tempNode;
         while(minNodeChild != startingPoint){
             minNodeChild->parent = nullptr;
+            tempNode = minNodeChild->right;
             Node::linkNodes(newMinNode, minNodeChild);
-            minNodeChild = minNodeChild->right;
+            minNodeChild = tempNode;
         }
     }
 
@@ -167,9 +175,12 @@ int FibonacciHeap::extractMin() {
         passedBy[currentNode] = true;
         currentNodeTemp = currentNode->right;
         if(degrees[currentNode->degree] != nullptr) {
-            minNodeTemp = FibonacciHeap::mergeTrees(currentNode, degrees[currentNode->degree], degrees);
+            minNodeTemp = FibonacciHeap::mergeTrees(degrees[currentNode->degree], currentNode, degrees);
             while(degrees[minNodeTemp->degree] != nullptr) {
-                minNodeTemp = FibonacciHeap::mergeTrees(minNodeTemp, degrees[minNodeTemp->degree], degrees);
+                if(minNodeTemp == this->minNode)
+                    minNodeTemp = FibonacciHeap::mergeTrees( minNodeTemp, degrees[minNodeTemp->degree], degrees);
+                else
+                    minNodeTemp = FibonacciHeap::mergeTrees(degrees[minNodeTemp->degree], minNodeTemp, degrees);
             }
             degrees[minNodeTemp->degree] = minNodeTemp;
         }else {
@@ -180,7 +191,46 @@ int FibonacciHeap::extractMin() {
     this->numberOfNodes--;
     return minValue;
 }
+// inainte sa faci cut child verifici daca parintele e marked sau nu
+void FibonacciHeap::cutChild(Node* parent, Node* child) {
+    // rupe nodul de parinte
+    // parinte->degree--
+    // schimba legaturile cu fratii sa sara peste
+    // check if new value is the new minimum value
+    // leaga nodul de minNode
+    // trebuie sa testezi si daca parintele parintelui pointeaza cu child catre el ( dupa ar trb sa pointeze cu child catre altcineva )
+    // scoti copilul, apoi parintele ( le bagi in rootlist) si setezi marked la false
+    if(parent)
+}
 
+void FibonacciHeap::decreaseKey(Node* node, int newValue) {
+    if(newValue > node->value)
+        return;
+    if(newValue >= node->parent->value)
+        return;
+    node->value = newValue;
+    if(node->parent == nullptr){
+        if(this->minNode->value > newValue)
+            this->minNode = node;
+        return;
+    }
+    if(node->parent->marked) {
+        node->parent->marked = false;
+        if(node->parent->parent == nullptr) // ASTA O FACI UNDEVA LA FINAL
+            return;
+        node->parent->parent->marked = true;
+        // trebuie sa testezi si daca parintele parintelui pointeaza cu child catre el ( dupa ar trb sa pointeze cu child catre altcineva )
+        // scoti copilul, apoi parintele ( le bagi in rootlist) si setezi marked la false
+    }else {
+        node->parent->marked = true;
+    }
+    // setezi valoare lui node -> newValue
+    // rupe nodul de parinte
+    // parinte->degree--
+    // schimba legaturile cu fratii sa sara peste
+    // check if new value is the new minimum value
+    // leaga nodul de minNode
+}
 
 int main() {
     FibonacciHeap a;
@@ -196,6 +246,7 @@ int main() {
     a.insert(1);
     a.insert(16);
     a.insert(20);
+    a.extractMin();
     a.extractMin();
     std::cout << a;
 }

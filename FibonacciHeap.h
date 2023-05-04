@@ -37,7 +37,8 @@ public:
     void insert(int value);
     static Node* mergeTrees(Node* root1, Node* root2, std::vector<Node*>& degrees);
     int extractMin();
-    void decreaseKey();
+    void cutChild(Node* parent, Node* child);
+    void decreaseKey(Node* node, int newValue);
 };
 
 #endif //FIBONACCIHEAPS_FIBONACCIHEAP_H
