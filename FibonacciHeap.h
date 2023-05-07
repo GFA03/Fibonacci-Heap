@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <algorithm>
 
 struct Node{
     int value;
@@ -27,6 +28,7 @@ struct Node{
 class FibonacciHeap{
     Node* minNode;
     int numberOfNodes;
+    std::vector<Node*> nodeList;
 public:
     FibonacciHeap():minNode(nullptr), numberOfNodes(0){}
 
@@ -39,6 +41,10 @@ public:
     int extractMin();
     void cutChild(Node* parent, Node* child);
     void decreaseKey(Node* node, int newValue);
+
+    Node* getNode(int index) const;
+
+    void printNodeList();
 };
 
 #endif //FIBONACCIHEAPS_FIBONACCIHEAP_H

@@ -83,12 +83,27 @@ std::ostream& operator<<(std::ostream& out, const FibonacciHeap& obj) {
     return out;
 }
 
+Node* FibonacciHeap::getNode(int index) const
+{
+    if(index >= 0 && index <= this->numberOfNodes)
+        return this->nodeList[index];
+    return nullptr;
+}
+
+void FibonacciHeap::printNodeList()
+{
+    for(int i = 0; i < this->nodeList.size(); ++i)
+        std::cout << this->nodeList[i]->value << " ";
+    std::cout << '\n';
+}
+
 int FibonacciHeap::findMin() {
     return minNode->value;
 }
 
 void FibonacciHeap::insert(int value) {
     Node* newNode = new Node(value);
+    this->nodeList.push_back(newNode);
     if(this->numberOfNodes > 0) {
         Node::linkNodes(this->minNode, newNode);
     }
@@ -121,6 +136,12 @@ Node* FibonacciHeap::mergeTrees(Node *root1, Node *root2, std::vector<Node *>& d
 
 int FibonacciHeap::extractMin() {
     int minValue = this->minNode->value;
+    for(int i = 0; i < this->nodeList.size(); ++i)
+        if(this->nodeList[i] == this->minNode)
+        {
+            this->nodeList.erase(this->nodeList.begin() + i);
+            break;
+        }
     if(this->numberOfNodes == 1){
         this->minNode = nullptr;
         this->numberOfNodes--;
@@ -191,7 +212,7 @@ int FibonacciHeap::extractMin() {
     this->numberOfNodes--;
     return minValue;
 }
-// inainte sa faci cut child verifici daca parintele e marked sau nu
+
 void FibonacciHeap::cutChild(Node* parent, Node* child) {
     if(parent->child == child) {
         if(parent->degree == 1) {
@@ -217,8 +238,13 @@ void FibonacciHeap::cutChild(Node* parent, Node* child) {
 }
 
 void FibonacciHeap::decreaseKey(Node* node, int newValue) {
-    if(newValue > node->value)
+    if(newValue >= node->value)
         return;
+    if(node->parent == nullptr)
+    {
+        node->value = newValue;
+        return;
+    }
     if(newValue >= node->parent->value)
         return;
     node->value = newValue;
@@ -238,6 +264,7 @@ int main() {
     a.insert(4);
     a.insert(6);
     a.extractMin();
+//    a.printNodeList();
     a.insert(1);
     a.insert(2);
     a.insert(10);
@@ -246,5 +273,8 @@ int main() {
     a.insert(20);
     a.extractMin();
     a.extractMin();
+    a.printNodeList();
+    a.decreaseKey(a.getNode(0), 1);
     std::cout << a;
+//    std::cout << a.getNode(5)->value;
 }
